@@ -1,0 +1,15 @@
+# AI: products that call a model, and our own agents
+
+- **AI-1 Define evaluation first.** Agree on measurable success criteria and whether the feature is needed at all. (AIE 1, 3, 4)
+- **AI-2 Evaluate each step and the whole task.** Without per-component evals you cannot locate a failure. Use your own test set, because public benchmarks only rule models out. (AIE 3, 4)
+- **AI-3 Use the simplest thing that works.** Try prompts first, then add retrieval for missing knowledge, and finetune only for behaviour problems that remain. (AIE 7)
+- **AI-4 Start retrieval simply.** Term-based search such as BM25 is a strong baseline. Add vectors if evaluation shows the need. Measure the retriever on its own. (AIE 6, 7)
+- **AI-5 Model output is untrusted input.** Validate it against a schema and escape it. Never execute it directly. Run generated code in isolation. (AIE 2, 5)
+- **AI-6 Retrieved content can carry instructions.** Documents, tool output and web pages are data, so prompt injection cannot be fully removed. Design so a successful injection does limited harm. (AIE 5)
+- **AI-7 Write actions need approval.** Read tools are lower risk. Require explicit human approval for impactful writes, and give each agent as few tools as the job needs. (AIE 5, 6, 10)
+- **AI-8 Guard inputs and outputs.** Mask sensitive data before it reaches an external model. Check outputs against a failure policy. (AIE 10)
+- **AI-9 Build for inconsistency.** The same input can give different output. Plan the user experience for wrong answers, and give people a way to correct them. (AIE 2, 10)
+- **AI-10 Self-reports are not evidence.** An agent can declare success on unfinished work. Verify with a check outside the agent, and cap retries and spending. (AIE 6)
+- **AI-11 Grow in steps.** Begin with a direct model call, then add context, guardrails, routing, caching and agent loops as each need is proven. Each adds failure modes. (AIE 10)
+- **AI-12 Pin and retest on model changes.** Pin versions and rerun evals on any change to a prompt or model, because an update can improve one application and degrade another. (AIE 4)
+- **AI-13 Observe the whole flow.** Log prompts, retrieved context, tool calls, cost and latency, and track time to detect and resolve failures. (AIE 10)

@@ -1,0 +1,6 @@
+# A project's own loop files never belong in the engine, which is public.
+# Anchored to the root so templates/LEARNINGS.md, the blank template, still ships.
+/.dev-loop/
+/LEARNINGS*.md
+/requirements/
+/docs/blueprint/

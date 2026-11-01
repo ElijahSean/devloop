@@ -1,0 +1,74 @@
+{
+  "_comment": "The project half of the dev loop. The devloop plugin is the engine and is the same everywhere; this file is everything that differs per project. Keys starting with _ are notes for humans and are ignored by the loop.",
+
+  "project": "<ProjectName>",
+  "summary": "<one sentence: what the system is, and the worst bug it could have>",
+  "developer": "<who approves at the gates>",
+
+  "_docs": "Paths are relative to the repository root. rules wins over process when they disagree. Leave a value null if the project has no such file.",
+  "docs": {
+    "rules": "CLAUDE.md",
+    "process": "DEVELOPMENT.md",
+    "tasks": "TASKS.md",
+    "design": null,
+    "decisions": null
+  },
+
+  "_blueprint": "The six design documents /devloop:blueprint produces. required: when true, /devloop:run will not start until all six are approved. Remove this key to turn the stage off entirely.",
+  "blueprint": {
+    "required": false,
+    "dir": "docs/blueprint"
+  },
+
+  "_superpowers": "Only read when the Superpowers plugin is installed; the loop works without it. tdd: when true, Execute follows its test-driven-development skill, which deletes code written before a failing test.",
+  "superpowers": {
+    "tdd": false
+  },
+
+  "requirements": {
+    "dir": "requirements",
+    "template": "requirements/_template.md"
+  },
+
+  "_learnings": "keep is how many entries stay in the main file; older ones move to the archive, which Scan searches instead of reading.",
+  "learnings": {
+    "file": "LEARNINGS.md",
+    "archive": "LEARNINGS-archive.md",
+    "keep": 15
+  },
+
+  "_checks": "Run by test-runner. when is always, or a tag the plan sets (for example migration or web). scope is full for a whole suite, or file when {file} is replaced by one spec path.",
+  "checks": [
+    { "name": "Tests", "command": "<test command>", "when": "always", "scope": "full" },
+    { "name": "Type-check", "command": "<typecheck command>", "when": "always", "scope": "full" }
+  ],
+
+  "_criticalTests": "The few tests that matter more than coverage. test-runner reports on each by name every run.",
+  "criticalTests": [],
+
+  "_testNotes": "Quirks of this machine or suite that test-runner must know so it does not misreport them.",
+  "testNotes": [],
+
+  "_architecture": "characteristics: the top three, in priority order, that this system must not trade away. The architect agent weighs every plan against these and no others. constraints: where the structural rules live.",
+  "architecture": {
+    "characteristics": ["<first>", "<second>", "<third>"],
+    "style": "<e.g. modular monolith, API + web client>",
+    "constraints": "CLAUDE.md"
+  },
+
+  "_security": "rules: where the project's own security non-negotiables live. trustBoundaries: every place outside input enters the system. sensitiveData: what must never leak or be logged.",
+  "security": {
+    "rules": "CLAUDE.md",
+    "trustBoundaries": [],
+    "sensitiveData": []
+  },
+
+  "_git": "The loop commits locally on this branch and never pushes, merges or deploys.",
+  "git": {
+    "branch": "main",
+    "neverRun": ["git push", "git remote add"]
+  },
+
+  "_ruleCheck": "Heading of the checklist at the bottom of the requirement template. requirement ticks lines from it; Record adds a line when a lesson is learned twice.",
+  "ruleCheckHeading": "Rule check"
+}
