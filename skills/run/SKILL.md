@@ -53,6 +53,11 @@ mid-plan decisions all go through the question tool, recommended option first,
 with a line under each option saying what picking it means. Never end a
 message with a question mark and wait for typed input.
 
+**Ask together, not one at a time.** Hold open questions and ask them in one go
+just before the approval at the next gate, up to four per call. Stop early only
+when the next step rests on the answer, or when carrying on could do harm or
+waste a lot of work. An early stop asks everything that is open at that point.
+
 **Gates are written for a reader who did not write the code.** Plain language
 first. Each technical term gets a one-line gloss the first time it appears in
 that message. Precision comes second, not instead.

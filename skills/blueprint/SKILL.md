@@ -74,7 +74,7 @@ an ideal system. Earlier documents are decided: do not reopen them here.
 Only ask what the reading did not answer: scope edges, priorities, and anywhere
 a default would be a guess. **Every question goes through the question tool**,
 recommended option first, a line under each option saying what picking it means,
-up to four per call. If this document exposes a real problem in an approved one,
+up to four per call, in as few calls as you can. If this document exposes a real problem in an approved one,
 ask whether to send it back rather than working around it.
 
 ## 4. Draft

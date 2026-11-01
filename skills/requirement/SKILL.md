@@ -39,6 +39,7 @@ default would be a guess. Resolve ambiguity now, not during the loop.
 
 **Every question goes through the question tool.** Recommended option first,
 a line under each option saying what picking it means, up to four per call.
+Finish the reading first, then ask everything in as few calls as you can.
 If a question has no sensible options, the reading should have answered it;
 if it truly is open, offer the two or three likeliest answers.
 

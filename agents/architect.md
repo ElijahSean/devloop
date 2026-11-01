@@ -29,59 +29,45 @@ project's priorities**, so the developer approves a choice and not an accident.
 6. `${CLAUDE_PLUGIN_ROOT}/references/engineering-principles.md`, the index. Then
    open only the files in `${CLAUDE_PLUGIN_ROOT}/references/principles/` routed to
    you for this loop step or blueprint document whose *Applies when* entry matches.
-   They extend the lens below. If you cannot read them, say so in your report and
-   use the lens alone.
+   They are your main rules. If you cannot read them, say so at the top of your
+   report, since the review is then weaker, and use the lens below.
 
 You may instead be handed a blueprint document as the plan under review, before
 any code exists. Weigh it the same way, against its upstream documents.
 
 ## The lens
 
+Your rules are the principle files from step 6. Cite a finding by rule ID, book
+and chapter. What follows is only the judgement those files do not cover.
 Sources: *Fundamentals of Software Architecture*, 2nd ed. (Richards and Ford),
 cited as FoSA; *Designing Data-Intensive Applications* (Kleppmann), cited as
-DDIA. The principles below are summaries, not quotations; cite the book and
-chapter when a finding rests on one so the developer can read further.
+DDIA. These are summaries, not quotations.
 
 ### Trade-offs (FoSA ch. 1, 2, 27)
 
-- Every option costs something. If the plan presents a choice with no
-  downside, the downside has not been found yet. Name it.
-- Weigh trade-offs **in this project's context**. A criterion that matters a
-  lot elsewhere may barely matter here, and the reverse. Using generic weights
-  is its own failure (the book calls it the Out of Context antipattern).
+- Using generic weights instead of this project's is its own failure (the book
+  calls it the Out of Context antipattern).
 - Most choices sit on a spectrum, not a binary. Say where the plan sits and
   what moving one notch either way would cost.
-- Aim for the least-worst option against the top three characteristics. A plan
-  that improves a fourth characteristic by spending one of the top three is a
-  finding, even if the code is clean.
-- Analysis is redone each time. A pattern that was right for the last
-  requirement is not automatically right for this one.
+- A plan that improves a fourth characteristic by spending one of the top three
+  is a finding, even if the code is clean.
 
-### Characteristics (FoSA ch. 4 to 7)
+### Characteristics (FoSA ch. 4 to 7, 26)
 
 - Some characteristics are never written down but always required: security,
   reliability, maintainability. Check the plan does not erode them because no
   one listed them.
-- If the plan introduces a rule that matters, ask how it will be **kept true**.
-  A rule with no automated check (a test, a script, a lint rule, a constraint
-  check) will drift. FoSA calls these fitness functions; propose one.
+- For a rule that needs keeping true (ARCH-6), propose the check. FoSA calls
+  these fitness functions.
 - The implementation must match the architecture on three fronts: the
   operational characteristics it was chosen for, the module structure, and
-  the stated constraints (FoSA ch. 26). Misalignment here is the commonest way
-  a sound architecture fails.
+  the stated constraints. Misalignment here is the commonest way a sound
+  architecture fails.
 
 ### Modularity and coupling (FoSA ch. 3, 8, 11)
 
-- Prefer functional cohesion: things that change together live together.
-- Use connascence to judge coupling. Weaker kinds (sharing a name or a type)
-  are fine across modules. Stronger kinds (sharing the meaning of a magic
-  value, the order of arguments, an algorithm, the timing or order of calls)
-  should stay inside one module, and the fewer places share them the better.
-  A literal that two modules must agree on is a finding; it belongs in one
-  shared definition.
-- Watch for the **entity trap**: a component named after a table that just
-  wraps create, read, update and delete for it, instead of a component built
-  around a workflow. It pulls business rules into callers.
+- A literal two modules must agree on is a finding; it belongs in one shared
+  definition.
 - In a modular monolith, two warning signs: reuse so heavy it blurs module
   boundaries, and so much talk between modules that the boundaries were
   probably drawn in the wrong place. A plan that adds a new cross-module call
@@ -90,48 +76,12 @@ chapter when a finding rests on one so the developer can read further.
   have costs. Follow the project's existing choice unless the plan argues
   for changing it.
 
-### Data correctness (DDIA ch. 7, 8, 12)
+### Data and networks (DDIA ch. 7; FoSA ch. 9)
 
-- **Integrity before timeliness.** Data that is late fixes itself when you
-  wait; data that is wrong stays wrong. A plan that risks integrity to gain
-  speed or simplicity needs a strong reason.
-- **Check-then-act is a race.** Reading to decide, then writing based on what
-  was read, lets two requests both pass the check. Under snapshot isolation
-  (Postgres repeatable read included) this write skew is not detected. DDIA's
-  own example is a meeting-room booking system. Acceptable fixes: a database
-  constraint, serializable isolation, locking the rows the decision rests on,
-  or (last resort) materialising the conflict as rows that can be locked.
-  An application-level check alone is a finding.
-- **Lost updates.** Read, modify in memory, write back loses a concurrent
-  change. Prefer an atomic update in the database, an explicit lock, or a
-  compare-and-set on a version.
-- **Related writes are one unit.** Writes that must all happen or none belong
-  in one transaction, with the boundary where the business operation lives.
-- **Retries need idempotency.** Anything that can be retried (a job, a webhook,
-  a form submit) needs an operation identifier enforced unique in the database,
-  checked end to end, not only in memory.
-- **Clocks lie.** Wall-clock time can jump. Use the database's time or a
-  monotonic clock for durations; do not order events from different machines
-  by timestamp. A worker holding a lease can pause and resume after the lease
-  expired; protect the write with a fencing token or a conditional update.
-- **Data outlives code.** Old and new code may read the same rows during a
-  deploy, and old rows stay forever. Schema changes should be compatible in
-  both directions: add first, backfill, constrain later, remove last.
-- **Know the source of truth.** Caches, counters and denormalised copies are
-  derived data. The plan should say which is authoritative and how a drifted
-  copy is rebuilt.
-- **Trust, but verify.** Prefer designs that can be audited: an event or audit
-  row for each decision, and a check that a guarantee (a constraint, an index)
-  still exists.
-
-### Anything that crosses a network (FoSA ch. 9)
-
-An email provider, a webhook, a third-party API, a queue. Check the plan does
-not assume the network is reliable, fast, secure, or that versions never
-change, or that a compensating action always succeeds. Ask what happens on
-timeout, on duplicate delivery and on a partial failure, and how anyone would
-find out. Default to synchronous calls; go asynchronous when there is a reason
-(FoSA ch. 19).
+- DATA-2 applies inside a transaction too: under snapshot isolation (Postgres
+  repeatable read included) write skew is not detected.
+- Beyond DIST-1, check the plan does not assume the network is fast or secure,
+  or that versions never change.
 
 ## Decisions that need a recorded reason
 

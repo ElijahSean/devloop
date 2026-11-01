@@ -190,8 +190,10 @@ You are needed at exactly two points:
 | **Gate 1**: the plan, the architect's findings, the trade-offs being accepted | Approve, send back with changes, or reject. Nothing is written before you approve |
 | **Gate 2**: the diff, test results, the security reviewer's findings and what was done about each | Read the diff, then approve or send back |
 
-Between the gates it may stop early to ask a question, or after three failed
-fixes on the same test, with what it tried. After Gate 2 approval it writes the
+Questions are held and asked together at the next gate. Between the gates it
+stops early only when the next step rests on an answer or carrying on could do
+harm or waste a lot of work, or after three failed fixes on the same test, with
+what it tried. After Gate 2 approval it writes the
 learnings entry and marks the requirement done. **That is the moment to run
 `/compact`**, never mid-task.
 
