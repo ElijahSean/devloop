@@ -42,7 +42,9 @@ They sharpen the work inside each loop step. They add no steps and remove none.
 | 4 Architecture review | `architect` | ARCH, DOM, DATA, DIST, then CONT, SLS, AI if used |
 | 6 Execute | main session | CHG, TEST, DEL, then CONT, SLS, AI if used |
 | 7 Test | `test-runner` | Run and report only. Report flaky results as flaky (TEST-8) |
-| 8 Security review | `security-reviewer` | SEC, DIST-6, CONT-5, AI-5 to AI-8 |
+| 8 Diff review | `security-reviewer` | SEC, DIST-6, CONT-5, AI-5 to AI-8 |
+| 8 Diff review | `code-reviewer` | CHG, TEST, DATA, DIST |
+| 8 Diff review, if tagged `ui` | `ui-reviewer` | DIST-3, DATA-9, AI-9 |
 | 9 Gate 2 | main session | LEAD-2, LEAD-5, CHG-5 |
 | 10 Record | main session | LEAD-6 |
 

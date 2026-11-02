@@ -1,6 +1,6 @@
 ---
 name: run
-description: Run the dev loop on the current project. Checks the blueprint, detects changed requirement files, scans, plans, gets an architecture review, stops at Gate 1, executes, tests, gets a security review, stops at Gate 2, then records learnings and updates state. Use when the user says run the loop, dev loop, next requirement, or fires the scheduled loop task.
+description: Run the dev loop on the current project. Checks the blueprint, detects changed requirement files, scans, plans, gets an architecture review, stops at Gate 1, executes, tests, gets the diff reviewed, stops at Gate 2, then records learnings and updates state. Use when the user says run the loop, dev loop, next requirement, or fires the scheduled loop task.
 ---
 
 # The dev loop
@@ -43,8 +43,8 @@ project rule it satisfies, and teach the genuinely hard mechanisms in a block
 comment. A comment that restates the code is noise.
 
 **Subagents read and run; the main session decides.** `scout`,
-`test-runner`, `architect` and `security-reviewer` each run in a fresh context,
-never edit a file, never change git state and never ask the developer
+`test-runner`, `architect`, `security-reviewer`, `code-reviewer` and
+`ui-reviewer` each run in a fresh context, never edit a file, never change git state and never ask the developer
 anything. Their questions come back in their reports and you ask them. You are
 the only writer, and you read every report critically rather than adopting it.
 
@@ -76,7 +76,8 @@ say so at the next gate and carry on without them.
 
 ## Small changes
 
-Most of a run's cost is the two Opus reviews, which a tiny change does not need.
+Most of a run's cost is the architecture and diff reviews, which a tiny change
+does not need.
 At Plan, call a change **small** only if all of these are true. If in doubt, it
 is not small.
 
@@ -90,8 +91,8 @@ is not small.
 A small change skips step 4. At Gate 1 say that it did and why, and offer "Run the
 full reviews" as a choice. At step 8, test the actual diff against the same list:
 if it still qualifies, skip the review and say so at Gate 2. If it no longer
-qualifies, run `architect` on the plan and `security-reviewer` on the diff before
-Gate 2. Scan, Test and both gates always run.
+qualifies, run `architect` on the plan, then the full diff review, before Gate 2.
+Scan, Test and both gates always run.
 
 ## Superpowers, if installed
 
@@ -125,7 +126,7 @@ conflicts with this skill, this skill wins.
 | 5 | **Gate 1** | developer |
 | 6 | Execute | you |
 | 7 | Test | `test-runner` |
-| 8 | Security review (skipped for a small change) | `security-reviewer` |
+| 8 | Diff review (skipped for a small change) | `security-reviewer`, `code-reviewer`, and `ui-reviewer` if tagged |
 | 9 | **Gate 2** | developer |
 | 10 | Record | you |
 | 11 | Update state | you, with the script |
@@ -173,8 +174,9 @@ Check the plan against the principles routed to this step, and name any it has
 to depart from, with the reason.
 
 Tag the plan with the check tags it needs (for example `migration` or `web`)
-so Test runs the right checks, note whether the change crosses any entry in
-`security.trustBoundaries`, and say whether it is a small change.
+so Test runs the right checks, and add the `ui` tag if the change alters a screen.
+Note whether the change crosses any entry in `security.trustBoundaries`, and say
+whether it is a small change.
 
 ### 4. Architecture review
 
@@ -212,22 +214,42 @@ three fixes aimed at it, report what you tried, why each did not work and your
 best diagnosis, then wait. The cap is per issue: an unrelated failure gets its
 own three.
 
-### 8. Security review
+### 8. Diff review
 
-Hand `security-reviewer` the diff range (for example `main~N..HEAD` or the
-working tree diff), the requirement path and the plan. **Diff mode**, always.
-Fix anything scored 6 or 9 before the gate and rerun the affected tests; that
-fix counts toward the three attempts like any other. Carry the rest to the gate.
+Start the reviewers together, in one message, and change nothing until every
+report is in. Each gets the diff range (for example `main~N..HEAD` or the working
+tree diff), the requirement path and the plan.
+
+| Reviewer | Runs | Looks for |
+|---|---|---|
+| `security-reviewer`, in **diff mode** | always | Security flaws |
+| `code-reviewer` | always | Whether the change does what was asked, correctness, tests, readability |
+| `ui-reviewer` | when the plan has the `ui` tag | Departures from the design, missing states, error paths, accessibility |
+
+If a reviewer returns no report, run it once more. If it still returns none, say so
+at Gate 2. A review that did not happen is never reported as clean.
+
+**Findings scored 6 or 9.** Fix each one and rerun the affected tests; that fix
+counts toward the three attempts like any other. If a fix needs a decision, hold it
+as a question for the gate. If you judge a finding wrong, say why at the gate rather
+than dropping it. Carry everything scored lower to the gate.
+
+**Every fix made here gets reviewed.** Hand the reviewer that raised the finding,
+and any other reviewer whose area the fix touches, the fix's range and their earlier
+findings. Any finding still scored 6 or 9 goes round again, **two rounds at most**.
+After the second, stop fixing and carry what is open to Gate 2 as unresolved, with
+what each round tried. No code reaches the gate unreviewed.
 
 ### 9. Gate 2
 
 Summarise what changed in plain language, show the diff, walk through anything
 non-obvious, report the test results (including anything that hit the cap) and
-the security findings with what you did about each. Check the change against
-the definition of done in `docs.process` and the principles routed to this step.
-Stop and wait for explicit approval
-as a clickable choice. Never merge, push or deploy, even if asked to "finish
-it up".
+each reviewer's findings with what you did about each, plus `ui-reviewer`'s list of
+things to check by eye. Check the change against the definition of done in
+`docs.process` and the principles routed to this step. If a finding scored 6 or 9 is
+still unresolved, say so first and make sending it back the recommended choice.
+Stop and wait for explicit approval as a clickable choice. Never merge, push or
+deploy, even if asked to "finish it up".
 
 ### 10. Record
 

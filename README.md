@@ -4,7 +4,7 @@ A requirement-driven dev loop for Claude Code, packaged as a plugin so every
 project runs the same loop.
 
 **Engine shared, config local.** This repository holds what is the same
-everywhere: the loop, the blueprint stage, the requirement interview, four
+everywhere: the loop, the blueprint stage, the requirement interview, six
 read-only agents and the engineering principles they all apply. Each project holds what differs in one file, `.dev-loop/config.json`.
 
 ## The loop
@@ -14,7 +14,7 @@ Blueprint (new applications, once): PRD -> TRD -> App Flow -> UI/UX Design
        -> Backend Schema -> Implementation Plan, each approved by you
 
 Blueprint check -> Detect -> Scan -> Plan -> Architecture review -> GATE 1
-       -> Execute -> Test -> Security review -> GATE 2 -> Record -> Update state
+       -> Execute -> Test -> Diff review -> GATE 2 -> Record -> Update state
 ```
 
 | Piece | Kind | Job |
@@ -26,7 +26,9 @@ Blueprint check -> Detect -> Scan -> Plan -> Architecture review -> GATE 1
 | `scout` | agent | Reads rules, learnings and code; returns a briefing |
 | `architect` | agent | Reviews the plan before Gate 1 |
 | `test-runner` | agent | Runs the configured checks; reports failures only |
-| `security-reviewer` | agent | Reviews the diff before Gate 2 (and the plan when a trust boundary is crossed) |
+| `security-reviewer` | agent | Reviews the diff for security flaws before Gate 2 (and the plan when a trust boundary is crossed) |
+| `code-reviewer` | agent | Reviews the diff for correctness, tests and readability before Gate 2 |
+| `ui-reviewer` | agent | Reviews changed screens against the design before Gate 2, when the plan has the `ui` tag |
 | `scripts/detect.mjs` | script | Hashes requirement and blueprint files against `.dev-loop/state.json` |
 | `references/engineering-principles.md` | reference | Index to rules from eight engineering books, routed to each loop step and blueprint document |
 | `references/principles/` | reference | The rules, one file per section, so each step loads only what applies |
@@ -188,7 +190,7 @@ You are needed at exactly two points:
 | You see | What to do |
 |---|---|
 | **Gate 1**: the plan, the architect's findings, the trade-offs being accepted | Approve, send back with changes, or reject. Nothing is written before you approve |
-| **Gate 2**: the diff, test results, the security reviewer's findings and what was done about each | Read the diff, then approve or send back |
+| **Gate 2**: the diff, test results, each reviewer's findings and what was done about each, and anything to check by eye | Read the diff, then approve or send back |
 
 Questions are held and asked together at the next gate. Between the gates it
 stops early only when the next step rests on an answer or carrying on could do
@@ -201,14 +203,14 @@ If nothing changed it says so and stops. One requirement at a time.
 
 **Small changes cost less.** A change of at most three files, with no schema
 change, new dependency, shared interface, security-sensitive code or departure
-from a rule or blueprint document, skips the architecture and security reviews.
+from a rule or blueprint document, skips the architecture and diff reviews.
 Scan, Test and both gates still run. Gate 1 tells you the reviews are being
 skipped and offers to run them anyway, and if the finished diff turns out bigger
 than planned, they run before Gate 2.
 
 ### 4. Read a review
 
-Both reviewers score each finding as impact (1 to 3) times likelihood (1 to 3):
+Every reviewer scores each finding as impact (1 to 3) times likelihood (1 to 3):
 
 | Score | Meaning | What the loop does |
 |---|---|---|
@@ -216,8 +218,15 @@ Both reviewers score each finding as impact (1 to 3) times likelihood (1 to 3):
 | 3 or 4 | Medium | Brings it to the gate as a trade-off you are accepting |
 | 1 or 2 | Low | Listed, no action required |
 
+Before Gate 2 the reviewers run in parallel on the same diff. Every fix made
+because of them goes back to the reviewers it concerns, two rounds at most. A high
+finding still open after that comes to Gate 2 as unresolved, and the recommended
+choice is to send the change back.
+
 Each security finding names the line that causes it and a test that would
-prove it. A finding without a line is listed as an open question instead.
+prove it. A finding from any reviewer without a line is listed as an open question
+instead. `ui-reviewer` reads code and never runs the app, so it also lists what you
+should check by eye.
 
 A finding that rests on an engineering principle also names its rule ID and
 source, such as `DATA-2` (DDIA 7). Rules that passed are not listed.
@@ -232,6 +241,9 @@ The agents also work outside the loop. Ask in plain words:
   commits made outside the loop.
 - "Have devloop:security-reviewer review this plan in plan mode" for a feature
   that adds a webhook, an upload or a sign-in path.
+- "Have devloop:code-reviewer review master~3..HEAD" for correctness and tests on
+  commits made outside the loop.
+- "Have devloop:ui-reviewer review master~3..HEAD" for a change to a screen.
 - "Run devloop:test-runner, full run" for a check of the whole project.
 
 They read `.dev-loop/config.json` either way, so the project's rules apply.
@@ -312,8 +324,13 @@ or forbids it: `brainstorming`, `writing-plans`, `executing-plans`,
   the OWASP Top 10 and ASVS for concrete application checks, since neither book
   is a security book.
 
-Both score findings with the book's impact x likelihood matrix, 1 to 9, so
-"high" means the same thing in both reports.
+- `code-reviewer`: the CHG and TEST rules, mostly from *Software Engineering at
+  Google*, with the data and network rules where a change touches them.
+- `ui-reviewer`: the project's approved UI/UX Design and App Flow, then the states,
+  error paths and accessibility those documents require.
+
+All of them score findings with the book's impact x likelihood matrix, 1 to 9, so
+"high" means the same thing in every report.
 
 `references/principles/` widens this to eight books, summarised in our own words: the two above, plus *Learning Domain-Driven Design* (Khononov),
 *Software Engineering at Google* (Winters, Manshreck and Wright), *Serverless
@@ -341,7 +358,7 @@ short version:
 | Key | Read by |
 |---|---|
 | `docs.*` | everything |
-| `blueprint.*` | init, blueprint, run, requirement, scout, architect, security-reviewer |
+| `blueprint.*` | init, blueprint, run, requirement, scout, architect, security-reviewer, ui-reviewer |
 | `superpowers.*` | init, run |
 | `requirements`, `learnings`, `ruleCheckHeading` | init, run, requirement, scout |
 | `checks`, `criticalTests` | test-runner, blueprint |

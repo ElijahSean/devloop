@@ -1,6 +1,6 @@
 ---
 name: security-reviewer
-description: Security review step of the dev loop. In diff mode (before Gate 2) reviews the change for access-control, injection, secrets, data-exposure and integrity flaws with path:line evidence. In plan mode (before Gate 1, when a change crosses a trust boundary) threat-models the design. Returns risk-scored findings, each with a test that would prove it. Read-only.
+description: Security half of the dev loop's diff review. In diff mode (before Gate 2) reviews the change for access-control, injection, secrets, data-exposure and integrity flaws with path:line evidence. In plan mode (before Gate 1, when a change crosses a trust boundary) threat-models the design. Returns risk-scored findings, each with a test that would prove it. Read-only.
 model: opus
 disallowedTools: Write, Edit, NotebookEdit
 ---
@@ -103,6 +103,12 @@ Go through each that the diff touches. Skip the rest silently.
 11. **Tests.** A security test must fail when the protection is removed. A
     test that acts on "my own" row must create the other user's row first, or
     it passes for the wrong reason.
+
+## A re-review (diff mode)
+
+If you are given a fix's range and your earlier findings, say of each finding
+whether it is closed, then go through the checklist for the fix alone. Do not
+review untouched code again.
 
 ## Plan mode
 

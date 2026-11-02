@@ -7,7 +7,7 @@
     {
       "name": "devloop",
       "source": "./",
-      "description": "Requirement-driven dev loop with a blueprint stage, engineering principles, and scout, test-runner, architect and security-reviewer agents."
+      "description": "Requirement-driven dev loop with a blueprint stage, engineering principles, and scout, test-runner, architect, security-reviewer, code-reviewer and ui-reviewer agents."
     }
   ]
 }

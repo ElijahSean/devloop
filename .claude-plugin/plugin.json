@@ -1,11 +1,11 @@
 {
   "name": "devloop",
   "displayName": "Dev Loop",
-  "version": "0.3.0",
-  "description": "A two-gate, requirement-driven dev loop with a blueprint stage: six approved documents (PRD, TRD, App Flow, UI/UX Design, Backend Schema, Implementation Plan) before code, then Detect, Scan, Plan, Architecture review, Gate 1, Execute, Test, Security review, Gate 2, Record, with engineering principles from eight books routed to each step. The engine is shared; each project supplies its own rules and checks in .dev-loop/config.json.",
+  "version": "0.4.0",
+  "description": "A two-gate, requirement-driven dev loop with a blueprint stage: six approved documents (PRD, TRD, App Flow, UI/UX Design, Backend Schema, Implementation Plan) before code, then Detect, Scan, Plan, Architecture review, Gate 1, Execute, Test, parallel Diff review, Gate 2, Record, with engineering principles from eight books routed to each step. The engine is shared; each project supplies its own rules and checks in .dev-loop/config.json.",
   "author": {
     "name": "Elijah Sean Galang"
   },
   "license": "MIT",
-  "keywords": ["dev-loop", "requirements", "architecture-review", "security-review", "learnings"]
+  "keywords": ["dev-loop", "requirements", "architecture-review", "security-review", "code-review", "learnings"]
 }
